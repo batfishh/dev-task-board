@@ -2,8 +2,10 @@
 
 import { useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
 import { Stage, Layer, Line } from 'react-konva';
+import { KonvaEventObject } from 'konva/lib/Node';
 import PostItNote from '@/components/PostItNote/PostItNote';
 import FloatingAddButton from '@/components/FloatingAddButton';
+import Loader from '@/components/Loader';
 
 type TaskType = 'todo' | 'progress' | 'done' | 'bug' | 'feature';
 
@@ -111,10 +113,14 @@ const KonvaBoard = forwardRef<KonvaBoardRef>((props, ref) => {
     }
   };
 
-  const handleMouseDown = (e: any) => {
+  const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
     if (!isSketchMode) return;
     
-    const pos = e.target.getStage().getPointerPosition();
+    const stage = e.target.getStage();
+    if (!stage) return;
+    const pos = stage.getPointerPosition();
+    if (!pos) return;
+    
     const newLine: DrawingLine = {
       id: `line-${Date.now()}`,
       points: [pos.x, pos.y]
@@ -124,11 +130,14 @@ const KonvaBoard = forwardRef<KonvaBoardRef>((props, ref) => {
     setCurrentLine(newLine);
   };
 
-  const handleMouseMove = (e: any) => {
+  const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
     if (!isSketchMode || !isDrawing || !currentLine) return;
     
     const stage = e.target.getStage();
+    if (!stage) return;
     const point = stage.getPointerPosition();
+    if (!point) return;
+    
     const updatedLine = {
       ...currentLine,
       points: [...currentLine.points, point.x, point.y]
@@ -212,6 +221,10 @@ const KonvaBoard = forwardRef<KonvaBoardRef>((props, ref) => {
     toggleSketchMode,
     saveBoard
   }));
+
+  if (isLoading) {
+    return <Loader message="Loading board data..." />;
+  }
 
   return (
     <>
