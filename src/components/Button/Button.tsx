@@ -1,45 +1,50 @@
-import React from 'react';
-import styles from './Button.module.css';
+import { Button } from "@/components/ui/button"
+import { Plus, Save, PenTool } from 'lucide-react';
 
-type IconType = 'plus' | 'save' | 'clear';
+type ButtonType = 'AddPostit' | 'Save' | 'SketchMode';
 
-interface ButtonProps {
-  icon: IconType;
+interface BoardButtonProps {
   onClick?: () => void;
-  className?: string;
+  type: ButtonType;
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  disabled?: boolean;
 }
 
-const icons = {
-  plus: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="12" y1="5" x2="12" y2="19"></line>
-      <line x1="5" y1="12" x2="19" y2="12"></line>
-    </svg>
-  ),
-  save: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-      <polyline points="17,21 17,13 7,13 7,21"></polyline>
-      <polyline points="7,3 7,8 15,8"></polyline>
-    </svg>
-  ),
-  clear: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="3,6 5,6 21,6"></polyline>
-      <path d="m19,6v14a2,2 0 0 1-2,2H7a2,2 0 0 1-2-2V6m3,0V4a2,2 0 0 1 2-2h4a2,2 0 0 1 2,2v2"></path>
-      <line x1="10" y1="11" x2="10" y2="17"></line>
-      <line x1="14" y1="11" x2="14" y2="17"></line>
-    </svg>
-  )
+const getButtonContent = (type: ButtonType) => {
+  switch (type) {
+    case 'AddPostit':
+      return (
+        <>
+          <Plus size={16} className="mr-2" />
+          Add Post-it
+        </>
+      );
+    case 'Save':
+      return (
+        <>
+          <Save size={16} className="mr-2" />
+          Save
+        </>
+      );
+    case 'SketchMode':
+      return (
+        <>
+          <PenTool size={16} className="mr-2" />
+          Sketch Mode
+        </>
+      );
+  }
 };
 
-export default function Button({ icon, onClick, className }: ButtonProps) {
+export function BoardButton({ onClick, type, variant = 'default', disabled = false }: BoardButtonProps) {
   return (
-    <button 
-      className={`${styles.button} ${className || ''}`}
+    <Button 
       onClick={onClick}
+      variant={variant}
+      disabled={disabled}
+
     >
-      {icons[icon]}
-    </button>
-  );
+      {getButtonContent(type)}
+    </Button>
+  )
 }
