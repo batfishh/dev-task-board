@@ -54,18 +54,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use upsert to insert or update the main board
+    // Delete existing board with name 'main' (ignores error if no row exists)
+    await supabase
+      .from('boards')
+      .delete()
+      .eq('name', 'main');
+
+    // Insert new board data
     const { data, error } = await supabase
       .from('boards')
-      .upsert(
-        {
-          name: 'main',
-          board_data: boardData,
-        },
-        {
-          onConflict: 'name'
-        }
-      )
+      .insert({
+        name: 'main',
+        board_data: boardData,
+      })
       .select('updated_at')
       .single();
 
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Board saved successfully',
+      message: 'Board saved successfully (replaced)',
       timestamp: data.updated_at
     });
 
