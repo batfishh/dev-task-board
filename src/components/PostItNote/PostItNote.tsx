@@ -100,7 +100,7 @@ export const PostItNote: React.FC<PostItNoteProps> = ({
         <Rect
           width={width}
           height={height}
-          fill={config.gradientStart}
+          fill="rgba(31, 27, 46, 0.85)"
           stroke="#4c4556"
           strokeWidth={1}
           cornerRadius={8}
@@ -126,7 +126,7 @@ export const PostItNote: React.FC<PostItNoteProps> = ({
           y={0}
           width={width}
           height={38}
-          fill="rgba(76, 69, 86, 0.3)"
+          fill="rgba(76, 69, 86, 0.15)"
           strokeWidth={0}
           cornerRadius={[8, 8, 0, 0]}
         />

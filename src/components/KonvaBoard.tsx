@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, forwardRef, useImperativeHandle, useRef } from 'react';
-import { Stage, Layer } from 'react-konva';
+import { useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
+import { Stage, Layer, Line } from 'react-konva';
 import PostItNote from '@/components/PostItNote/PostItNote';
 import FloatingAddButton from '@/components/FloatingAddButton';
 
@@ -23,15 +23,25 @@ interface EditingState {
   type: TaskType;
 }
 
+interface DrawingLine {
+  points: number[];
+  id: string;
+}
+
 export interface KonvaBoardRef {
   addPostIt: (type?: TaskType) => void;
+  toggleSketchMode: () => void;
+  saveBoard: () => Promise<boolean>;
 }
 
 const KonvaBoard = forwardRef<KonvaBoardRef>((props, ref) => {
-  const [postIts, setPostIts] = useState<PostItData[]>([
-    { id: 'default', x: 250, y: 180, text: 'Task description...', type: 'todo' }
-  ]);
+  const [postIts, setPostIts] = useState<PostItData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [editing, setEditing] = useState<EditingState | null>(null);
+  const [isSketchMode, setIsSketchMode] = useState(false);
+  const [drawingLines, setDrawingLines] = useState<DrawingLine[]>([]);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [currentLine, setCurrentLine] = useState<DrawingLine | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const addPostIt = (type: TaskType = 'todo') => {
@@ -94,13 +104,151 @@ const KonvaBoard = forwardRef<KonvaBoardRef>((props, ref) => {
     setEditing(null);
   };
 
+  const toggleSketchMode = () => {
+    setIsSketchMode(!isSketchMode);
+    if (editing) {
+      setEditing(null); // Close any open editing when entering sketch mode
+    }
+  };
+
+  const handleMouseDown = (e: any) => {
+    if (!isSketchMode) return;
+    
+    const pos = e.target.getStage().getPointerPosition();
+    const newLine: DrawingLine = {
+      id: `line-${Date.now()}`,
+      points: [pos.x, pos.y]
+    };
+    
+    setIsDrawing(true);
+    setCurrentLine(newLine);
+  };
+
+  const handleMouseMove = (e: any) => {
+    if (!isSketchMode || !isDrawing || !currentLine) return;
+    
+    const stage = e.target.getStage();
+    const point = stage.getPointerPosition();
+    const updatedLine = {
+      ...currentLine,
+      points: [...currentLine.points, point.x, point.y]
+    };
+    
+    setCurrentLine(updatedLine);
+  };
+
+  const handleMouseUp = () => {
+    if (!isSketchMode || !isDrawing || !currentLine) return;
+    
+    setDrawingLines(prev => [...prev, currentLine]);
+    setCurrentLine(null);
+    setIsDrawing(false);
+  };
+
+  // Load board state on mount
+  useEffect(() => {
+    loadBoard();
+  }, []);
+
+  const loadBoard = async () => {
+    try {
+      const response = await fetch('/api/board');
+      if (response.ok) {
+        const boardState = await response.json();
+        if (boardState.postIts && boardState.postIts.length > 0) {
+          setPostIts(boardState.postIts);
+        } else {
+          // Set default post-it if no saved data
+          setPostIts([{ id: 'default', x: 250, y: 180, text: 'Task description...', type: 'todo' }]);
+        }
+        if (boardState.drawingLines) {
+          setDrawingLines(boardState.drawingLines);
+        }
+      } else {
+        // Set default post-it on load error
+        setPostIts([{ id: 'default', x: 250, y: 180, text: 'Task description...', type: 'todo' }]);
+      }
+    } catch (error) {
+      console.error('Error loading board:', error);
+      // Set default post-it on load error
+      setPostIts([{ id: 'default', x: 250, y: 180, text: 'Task description...', type: 'todo' }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveBoard = async (): Promise<boolean> => {
+    try {
+      const boardData = {
+        postIts,
+        drawingLines
+      };
+
+      const response = await fetch('/api/board', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(boardData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Board saved successfully:', result.timestamp);
+        return true;
+      } else {
+        const error = await response.json();
+        console.error('Failed to save board:', error.error);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error saving board:', error);
+      return false;
+    }
+  };
+
   useImperativeHandle(ref, () => ({
-    addPostIt
+    addPostIt,
+    toggleSketchMode,
+    saveBoard
   }));
 
   return (
     <>
-      <Stage width={window.innerWidth} height={window.innerHeight}>
+      <Stage 
+        width={window.innerWidth} 
+        height={window.innerHeight}
+        onMouseDown={handleMouseDown}
+        onMousemove={handleMouseMove}
+        onMouseup={handleMouseUp}
+        style={{ cursor: isSketchMode ? 'crosshair' : 'default' }}
+      >
+        {/* Drawing layer - behind post-its */}
+        <Layer>
+          {drawingLines.map(line => (
+            <Line
+              key={line.id}
+              points={line.points}
+              stroke="white"
+              strokeWidth={2}
+              tension={0.5}
+              lineCap="round"
+              lineJoin="round"
+            />
+          ))}
+          {currentLine && (
+            <Line
+              points={currentLine.points}
+              stroke="white"
+              strokeWidth={2}
+              tension={0.5}
+              lineCap="round"
+              lineJoin="round"
+            />
+          )}
+        </Layer>
+        
+        {/* Post-its layer - in front of drawings */}
         <Layer>
           {postIts.map(postit => (
             <PostItNote
@@ -111,7 +259,7 @@ const KonvaBoard = forwardRef<KonvaBoardRef>((props, ref) => {
               text={postit.text}
               type={postit.type}
               onDragEnd={handleDragEnd}
-              onClick={handleClick}
+              onClick={isSketchMode ? undefined : handleClick}
             />
           ))}
         </Layer>
