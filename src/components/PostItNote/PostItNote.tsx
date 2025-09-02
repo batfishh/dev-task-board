@@ -55,7 +55,7 @@ const taskTypeConfig = {
   }
 };
 
-export const PostItNote: React.FC<PostItNoteProps> = ({
+export const PostItNote = React.memo<PostItNoteProps>(({
   id,
   x,
   y,
@@ -95,6 +95,11 @@ export const PostItNote: React.FC<PostItNoteProps> = ({
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         onClick={handleClickEvent}
+        dragBoundFunc={(pos) => ({
+          x: Math.max(0, Math.min(pos.x, window.innerWidth - width)),
+          y: Math.max(0, Math.min(pos.y, window.innerHeight - height))
+        })}
+        perfectDrawEnabled={false}
       >
         {/* Main background */}
         <Rect
@@ -105,9 +110,9 @@ export const PostItNote: React.FC<PostItNoteProps> = ({
           strokeWidth={1}
           cornerRadius={8}
           shadowColor="rgba(0, 0, 0, 0.6)"
-          shadowBlur={10}
-          shadowOffset={{ x: 0, y: 4 }}
-          shadowOpacity={0.4}
+          shadowBlur={isDragging ? 0 : 10}
+          shadowOffset={{ x: 0, y: isDragging ? 0 : 4 }}
+          shadowOpacity={isDragging ? 0 : 0.4}
         />
         
         {/* Left border accent */}
@@ -170,6 +175,8 @@ export const PostItNote: React.FC<PostItNoteProps> = ({
 
     </>
   );
-};
+});
+
+PostItNote.displayName = 'PostItNote';
 
 export default PostItNote;

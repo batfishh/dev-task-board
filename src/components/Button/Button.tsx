@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
-import { Plus, Save, PenTool } from 'lucide-react';
+import { Plus, Save, PenTool, Trash2 } from 'lucide-react';
 
-type ButtonType = 'AddPostit' | 'Save' | 'SketchMode';
+type ButtonType = 'AddPostit' | 'Save' | 'SketchMode' | 'Clear';
 
 interface BoardButtonProps {
   onClick?: () => void;
@@ -31,6 +31,13 @@ const getButtonContent = (type: ButtonType) => {
         <>
           <PenTool size={16} className="mr-2" />
           Sketch Mode
+        </>
+      );
+    case 'Clear':
+      return (
+        <>
+          <Trash2 size={16} className="mr-2" />
+          Clear
         </>
       );
   }

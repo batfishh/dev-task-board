@@ -34,6 +34,7 @@ export interface KonvaBoardRef {
   addPostIt: (type?: TaskType) => void;
   toggleSketchMode: () => void;
   saveBoard: () => Promise<boolean>;
+  clearBoard: () => void;
 }
 
 const KonvaBoard = forwardRef<KonvaBoardRef>((props, ref) => {
@@ -216,10 +217,17 @@ const KonvaBoard = forwardRef<KonvaBoardRef>((props, ref) => {
     }
   };
 
+  const clearBoard = () => {
+    setPostIts([]);
+    setDrawingLines([]);
+    setEditing(null);
+  };
+
   useImperativeHandle(ref, () => ({
     addPostIt,
     toggleSketchMode,
-    saveBoard
+    saveBoard,
+    clearBoard
   }));
 
   if (isLoading) {

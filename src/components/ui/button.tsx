@@ -1,9 +1,9 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
-import { Plus, Save, PenTool } from 'lucide-react'
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import { Plus, Save, PenTool, Trash2 } from "lucide-react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -34,31 +34,38 @@ const buttonVariants = cva(
       size: "default",
     },
   }
-)
+);
 
-type BoardButtonType = 'AddPostit' | 'Save' | 'SketchMode';
+type BoardButtonType = "AddPostit" | "Save" | "SketchMode" | "Clear";
 
 const getButtonContent = (buttonType: BoardButtonType) => {
   switch (buttonType) {
-    case 'AddPostit':
+    case "AddPostit":
       return (
         <>
           <Plus size={16} className="mr-2" />
           Add Post-it
         </>
       );
-    case 'Save':
+    case "Save":
       return (
         <>
           <Save size={16} className="mr-2" />
           Save
         </>
       );
-    case 'SketchMode':
+    case "SketchMode":
       return (
         <>
           <PenTool size={16} className="mr-2" />
           Sketch Mode
+        </>
+      );
+    case "Clear":
+      return (
+        <>
+          <Trash2 size={16} className="mr-2" />
+          Clear
         </>
       );
   }
@@ -77,7 +84,7 @@ function Button({
     asChild?: boolean;
     buttonType?: BoardButtonType;
   }) {
-  const Comp = asChild ? Slot : "button"
+  const Comp = asChild ? Slot : "button";
 
   const content = buttonType ? getButtonContent(buttonType) : children;
 
@@ -89,7 +96,7 @@ function Button({
     >
       {content}
     </Comp>
-  )
+  );
 }
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };

@@ -39,6 +39,13 @@ export default function Board() {
     }
   };
 
+  const handleClear = () => {
+    const confirmed = window.confirm('Are you sure you want to clear the entire board? This action cannot be undone.');
+    if (confirmed) {
+      konvaBoardRef.current?.clearBoard();
+    }
+  };
+
   return (
     <div style={boardStyles.board}>
       <div style={{...boardStyles.buttonContainer, zIndex: 1000}}>
@@ -57,6 +64,11 @@ export default function Board() {
           onClick={handleSave}
           disabled={isSaving}
           style={isSaving ? { opacity: 0.6 } : undefined}
+        />
+        <Button 
+          buttonType="Clear" 
+          onClick={handleClear}
+          variant="destructive"
         />
       </div>
       <div style={{position: 'absolute', top: 0, left: 0, zIndex: 1}}>
