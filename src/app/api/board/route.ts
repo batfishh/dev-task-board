@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, type BoardData } from '@/lib/supabase';
+import { validateRequest } from '@/lib/auth';
 
 // GET - Load board state
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Validate JWT token
+  if (!validateRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const { data, error } = await supabase
       .from('boards')
@@ -43,6 +48,11 @@ export async function GET() {
 
 // POST - Save board state
 export async function POST(request: NextRequest) {
+  // Validate JWT token
+  if (!validateRequest(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  
   try {
     const boardData: BoardData = await request.json();
 

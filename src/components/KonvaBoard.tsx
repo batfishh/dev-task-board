@@ -163,6 +163,11 @@ const KonvaBoard = forwardRef<KonvaBoardRef>((props, ref) => {
   const loadBoard = async () => {
     try {
       const response = await fetch('/api/board');
+      if (response.status === 401) {
+        // Unauthorized - redirect to login
+        window.location.href = '/login';
+        return;
+      }
       if (response.ok) {
         const boardState = await response.json();
         if (boardState.postIts && boardState.postIts.length > 0) {
@@ -202,6 +207,11 @@ const KonvaBoard = forwardRef<KonvaBoardRef>((props, ref) => {
         body: JSON.stringify(boardData),
       });
 
+      if (response.status === 401) {
+        // Unauthorized - redirect to login
+        window.location.href = '/login';
+        return false;
+      }
       if (response.ok) {
         const result = await response.json();
         console.log('Board saved successfully:', result.timestamp);
