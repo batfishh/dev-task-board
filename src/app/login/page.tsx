@@ -76,12 +76,14 @@ export default function Login() {
               ...(isLoading && { opacity: 0.6 })
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = '#a78bfa';
-              e.target.style.boxShadow = '0 0 0 3px rgba(139, 92, 246, 0.1)';
+              const target = e.target as HTMLInputElement;
+              target.style.borderColor = '#a78bfa';
+              target.style.boxShadow = '0 0 0 3px rgba(139, 92, 246, 0.1)';
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = error ? '#f87171' : '#8b5cf6';
-              e.target.style.boxShadow = 'none';
+              const target = e.target as HTMLInputElement;
+              target.style.borderColor = error ? '#f87171' : '#8b5cf6';
+              target.style.boxShadow = 'none';
             }}
           />
           
@@ -105,13 +107,15 @@ export default function Login() {
             }}
             onMouseEnter={(e) => {
               if (!isLoading && password.trim()) {
-                e.target.style.transform = 'translateY(-1px)';
-                e.target.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)';
+                const target = e.target as HTMLButtonElement;
+                target.style.transform = 'translateY(-1px)';
+                target.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)';
               }
             }}
             onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
+              const target = e.target as HTMLButtonElement;
+              target.style.transform = 'translateY(0)';
+              target.style.boxShadow = 'none';
             }}
           >
             {isLoading ? 'Checking...' : 'Enter'}
